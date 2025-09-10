@@ -1,99 +1,82 @@
-// Base API URL (from .env or fallback)
-export const API_BASE =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// This file intentionally left minimal to avoid duplicate exports when building on case-sensitive FS.
+// The real API surface is exported from `src/api.tsx` (lowercase). Keep this file to maintain compatibility
+// with imports that reference `../Api` (uppercase) on case-insensitive dev machines.
+export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// ----------------------
-// Types
-// ----------------------
-export interface SignupData {
-  name: string;
-  email: string;
-  password: string;
-  mobile: string;
-}
-
-export interface LoginPayload {
-  loginId: string;
-  password: string;
-}
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-  token?: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  mobile: string;
-}
-
-// ----------------------
-// API Calls
-// ----------------------
-
-// ✅ Signup
-export async function signup(
-  data: SignupData
-): Promise<ApiResponse<User>> {
+export async function signup(data: any) {
   const res = await fetch(`${API_BASE}/auth/signup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
   });
-  return res.json();
+  // Always attempt to return parsed JSON so frontend can handle success/error payloads
+  try {
+    const json = await res.json();
+    return json;
+  } catch (e) {
+    return { success: false, message: 'Signup failed' };
+  }
 }
 
-// ✅ Login
-export async function login(
-  payload: LoginPayload
-): Promise<ApiResponse<{ token: string }>> {
+export async function login(payload: { loginId: string; password: string }) {
   const res = await fetch(`${API_BASE}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
   });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Login failed');
+  }
   return res.json();
 }
 
-// ✅ Verify OTP
-export async function verifyOtp(
-  mobile: string,
-  otp: string
-): Promise<ApiResponse<{ verified: boolean }>> {
+export async function verifyOtp(mobile: string, otp: string) {
   const res = await fetch(`${API_BASE}/auth/verify-otp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mobile, otp }),
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mobile, otp })
   });
   return res.json();
 }
 
-// ✅ Resend OTP
-export async function resendOtp(
-  mobile: string
-): Promise<ApiResponse<{ sent: boolean }>> {
+export async function resendOtp(mobile: string) {
   const res = await fetch(`${API_BASE}/auth/resend-otp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mobile }),
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mobile })
   });
   return res.json();
 }
 
-// ✅ Get all users
-export async function getAllUsers(
-  token?: string
-): Promise<ApiResponse<User[]>> {
+export async function getAllUsers(token?: string) {
   const res = await fetch(`${API_BASE}/auth/all-users`, {
-    method: "GET",
+    method: 'GET',
+    mode: 'cors',
     headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to fetch users');
+  }
+  return res.json();
+}
+
+export async function sendOtp(mobile: string) {
+  const res = await fetch(`${API_BASE}/auth/send-otp`, {
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mobile })
   });
   return res.json();
 }
