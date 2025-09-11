@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Shield, CheckCircle } from 'lucide-react';
-import * as api from '../api';
+import * as api from '../Api';
 
 interface OTPVerificationProps {
   mobile: string;

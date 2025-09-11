@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import OTPVerification from './OTPVerification';
-import * as api from '../api';
+import * as api from '../Api';
 
 // Simple component to collect mobile number, call sendOtp, then show OTPVerification
 const MobileOtp: React.FC = () => {

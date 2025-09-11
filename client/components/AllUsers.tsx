@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import * as api from '../api';
+import * as api from '../Api';
 
 interface AllUsersProps {
   onGoBack: () => void;

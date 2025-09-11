@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, User, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
-import * as api from '../api';
+import * as api from '../Api';
 
 interface SignupProps {
   onSwitchToLogin: () => void;
