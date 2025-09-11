@@ -1,7 +1,7 @@
 // This file intentionally left minimal to avoid duplicate exports when building on case-sensitive FS.
 // The real API surface is exported from `src/api.tsx` (lowercase). Keep this file to maintain compatibility
 // with imports that reference `../Api` (uppercase) on case-insensitive dev machines.
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const API_BASE = 'http://localhost:5000/api';
 
 export async function signup(data: any) {
   const res = await fetch(`${API_BASE}/auth/signup`, {
