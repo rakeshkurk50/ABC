@@ -56,51 +56,115 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onSignupSuccess }) => 
   }, []);
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
+  
+    // Names: Only alphabets, spaces, apostrophes, hyphens allowed
     const nameRegex = /^[A-Za-z\s'-]+$/;
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    else if (!nameRegex.test(formData.firstName)) newErrors.firstName = 'First name cannot contain numbers or special characters';
-
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    else if (!nameRegex.test(formData.lastName)) newErrors.lastName = 'Last name cannot contain numbers or special characters';
-
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    } else if (!nameRegex.test(formData.firstName)) {
+      newErrors.firstName = 'First name can only contain letters, spaces, apostrophes, and hyphens';
+    }
+  
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (!nameRegex.test(formData.lastName)) {
+      newErrors.lastName = 'Last name can only contain letters, spaces, apostrophes, and hyphens';
+    }
+  
+    // Mobile number: only digits allowed, exactly 10 digits
     if (!formData.mobile.trim()) {
       newErrors.mobile = 'Mobile number is required';
     } else {
-      const digits = formData.mobile.replace(/\D/g, '');
-      if (digits.length !== 10) newErrors.mobile = 'Phone number must be 10 digits';
-      else if (existingUsers.some((u: any) => (u.mobile || '') === formData.mobile || (u.mobile || '') === digits)) newErrors.mobile = 'Phone number already in use';
+      const digits = formData.mobile.replace(/\D/g, ''); // remove non-digit chars
+      if (digits.length !== 10) {
+        newErrors.mobile = 'Mobile number must be exactly 10 digits';
+      } else if (
+        existingUsers.some(
+          (u: any) => (u.mobile || '') === formData.mobile || (u.mobile || '') === digits
+        )
+      ) {
+        newErrors.mobile = 'Mobile number already in use';
+      }
     }
+  
+    // Email: validate standard email format
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
-    } else if (existingUsers.some((u: any) => (u.email || '').toLowerCase() === formData.email.toLowerCase())) {
+    } else if (
+      existingUsers.some(
+        (u: any) => (u.email || '').toLowerCase() === formData.email.toLowerCase()
+      )
+    ) {
       newErrors.email = 'Email already in use';
     }
-    if (!formData.street.trim()) newErrors.street = 'Street address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.country.trim()) newErrors.country = 'Country is required';
+  
+    // Street Address: allow alphanumeric, spaces, commas, periods, hyphens
+    // (Common address chars, but no special chars like #, $, etc.)
+    if (!formData.street.trim()) {
+      newErrors.street = 'Street address is required';
+    } else if (!/^[a-zA-Z0-9\s,.'-]+$/.test(formData.street)) {
+      newErrors.street = 'Street address contains invalid characters';
+    }
+  
+    // City: alphabets and spaces only (like names)
+    if (!formData.city.trim()) {
+      newErrors.city = 'City is required';
+    } else if (!/^[A-Za-z\s'-]+$/.test(formData.city)) {
+      newErrors.city = 'City can only contain letters, spaces, apostrophes, and hyphens';
+    }
+  
+    // State: alphabets and spaces only
+    if (!formData.state.trim()) {
+      newErrors.state = 'State is required';
+    } else if (!/^[A-Za-z\s'-]+$/.test(formData.state)) {
+      newErrors.state = 'State can only contain letters, spaces, apostrophes, and hyphens';
+    }
+  
+    // Country: alphabets and spaces only
+    if (!formData.country.trim()) {
+      newErrors.country = 'Country is required';
+    } else if (!/^[A-Za-z\s'-]+$/.test(formData.country)) {
+      newErrors.country = 'Country can only contain letters, spaces, apostrophes, and hyphens';
+    }
+  
+    // Login ID: alphanumeric, underscore, dot, hyphen; at least 3 chars
     const loginIdRegex = /^[a-zA-Z0-9_.-]{3,}$/;
-    if (!formData.loginId.trim()) newErrors.loginId = 'Login ID is required';
-    else if (!loginIdRegex.test(formData.loginId)) newErrors.loginId = 'Login ID must be alphanumeric (3+ chars)';
-    else if (existingUsers.some((u: any) => (u.loginId || '').toLowerCase() === formData.loginId.toLowerCase())) newErrors.loginId = 'Login ID already taken';
-    const passwordRegex = /(?=.*[A-Z]).{6,}/; // min 6 chars and at least one uppercase
+    if (!formData.loginId.trim()) {
+      newErrors.loginId = 'Login ID is required';
+    } else if (!loginIdRegex.test(formData.loginId)) {
+      newErrors.loginId =
+        'Login ID must be at least 3 characters and can contain letters, numbers, underscore, dot, and hyphen';
+    } else if (
+      existingUsers.some(
+        (u: any) => (u.loginId || '').toLowerCase() === formData.loginId.toLowerCase()
+      )
+    ) {
+      newErrors.loginId = 'Login ID already taken';
+    }
+  
+    // Password: minimum 6 chars, at least 1 uppercase letter
+    const passwordRegex = /^(?=.*[A-Z]).{6,}$/;
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (!passwordRegex.test(formData.password)) {
-      newErrors.password = 'Password must be at least 6 characters and contain at least one uppercase letter';
+      newErrors.password =
+        'Password must be at least 6 characters and contain at least one uppercase letter';
     }
+  
+    // Confirm Password: must match password
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
