@@ -10,28 +10,25 @@ const app = express();
 // Connect to the database
 connectDB();
 
-// CORS configuration: Handle preflight requests and set headers
-// This robust setup allows multiple origins, falls back to a single origin,
-// or uses common localhost ports for development.
+// Determine allowed CORS origins
 let allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(',').map((o) => o.trim())
   : process.env.CLIENT_URL
   ? [process.env.CLIENT_URL]
   : null;
+
 const isDev = process.env.NODE_ENV !== 'production';
 if (!allowedOrigins && isDev) {
   allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
 }
 
+// CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow non-browser requests (like from curl or Postman)
     if (!origin) return callback(null, true);
-    // If the origin is in our allowed list, allow it
     if (allowedOrigins && allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    // Otherwise, deny the request
     const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
     return callback(new Error(msg), false);
   },
@@ -40,14 +37,16 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// Apply the single, correct CORS middleware to the entire app.
-// It automatically handles preflight OPTIONS requests for all routes.
+// Apply CORS middleware globally
 app.use(cors(corsOptions));
 
-// Initialize Middleware
-app.use(express.json({ extended: false }));
+// ✅ Explicitly handle preflight requests
+app.options('*', cors(corsOptions));
 
-// Simple debug logger for incoming requests (can be removed later)
+// Parse incoming JSON
+app.use(express.json());
+
+// Debug logger for requests
 app.use((req, res, next) => {
   console.log('[DEBUG] method=', req.method, 'origin=', req.headers.origin);
   next();
@@ -57,6 +56,6 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => res.send('API Running'));
 app.use('/api/auth', require('./routes/auth'));
 
+// Start server
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
