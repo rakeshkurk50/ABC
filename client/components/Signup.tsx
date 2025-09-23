@@ -173,16 +173,10 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onSignupSuccess }) => 
     setIsLoading(true);
     try {
       const res = await api.signup(formData);
-      // If backend indicates success (OTP sent or generated), proceed to OTP step
-      if (res && res.success) {
-        // normalize mobile to +91xxxxxxxxxx when possible for consistency
-        const digits = formData.mobile.replace(/\D/g, '');
-        const normalizedMobile = digits.length === 10 ? `+91${digits}` : formData.mobile;
-
-        // If backend returned OTP (dev mode), store it temporarily so user can see/use it
-        if (res.code) sessionStorage.setItem('dev_otp', String(res.code));
-
-        onSignupSuccess(normalizedMobile);
+      // If backend indicates success (OTP sent), proceed to OTP step
+        if (res && res.success) {
+          // Pass both mobile and email for OTP verification
+          onSignupSuccess(formData.mobile, formData.email);
       } else if (res && res.message) {
         setErrors({ general: res.message });
       } else {
@@ -449,15 +443,41 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onSignupSuccess }) => 
             </div>
           </div>
 
-          {errors.general && <p className="text-red-600 text-center mb-4">{errors.general}</p>}
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Signup Failed</h3>
+                  <p className="text-sm text-red-700 mt-1">{errors.general}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={isLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-200 disabled:opacity-50 flex items-center justify-center"
           >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
-            <ArrowRight className="ml-2" />
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Account...
+              </>
+            ) : (
+              <>
+                Create Account
+                <ArrowRight className="ml-2" />
+              </>
+            )}
           </button>
         </form>
 

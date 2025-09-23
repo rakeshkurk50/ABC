@@ -4,19 +4,27 @@
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 export async function signup(data: any) {
-  const res = await fetch(`${API_BASE}/auth/signup`, {
-    method: 'POST',
-    mode: 'cors',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data)
-  });
-  // Always attempt to return parsed JSON so frontend can handle success/error payloads
   try {
+    const res = await fetch(`${API_BASE}/auth/signup`, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data)
+    });
+
     const json = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(json.message || 'Signup failed');
+    }
+    
     return json;
-  } catch (e) {
-    return { success: false, message: 'Signup failed' };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.message || 'Network error occurred during signup. Please try again.'
+    };
   }
 }
 

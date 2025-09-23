@@ -17,10 +17,11 @@ const AllUsers: React.FC<AllUsersProps> = ({ onGoBack }) => {
       setError('');
       try {
         const token = localStorage.getItem('token') || undefined;
+        console.log('Token for getAllUsers:', token);
         const res = await api.getAllUsers(token || undefined);
-        // backend returns { success, message, data }
-        if (res && res.data) {
-          setUsers(res.data);
+        // backend returns { success, message, users }
+        if (res && res.users) {
+          setUsers(res.users);
         } else if (res && res.message) {
           setError(res.message || 'Failed to fetch users');
         } else {

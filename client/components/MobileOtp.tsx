@@ -22,7 +22,7 @@ const MobileOtp: React.FC = () => {
     try {
       const res = await api.sendOtp(normalized);
       if (res && res.success) {
-        // If Twilio isn't configured the API returns the code; in that case we still proceed to verification
+        // If Brave isn't configured the API may return the code; in that case we still proceed to verification
         setStep('verify');
       } else {
         setError(res && res.message ? res.message : 'Failed to send OTP');
@@ -72,5 +72,3 @@ const MobileOtp: React.FC = () => {
 };
 
 export default MobileOtp;
-
-
