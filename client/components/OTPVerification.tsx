@@ -3,12 +3,13 @@ import * as api from '../Api';
 
 interface Props {
   mobile: string;
-  email: string;
+  email?: string; // Make email optional as it might not be passed from MobileOtp
   onVerificationSuccess: () => void;
   onGoBack: () => void;
+  otpCode?: string; // New prop to receive OTP code
 }
 
-const OTPVerification: React.FC<Props> = ({ mobile, email, onVerificationSuccess, onGoBack }) => {
+const OTPVerification: React.FC<Props> = ({ mobile, email, onVerificationSuccess, onGoBack, otpCode }) => {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -50,8 +51,13 @@ const OTPVerification: React.FC<Props> = ({ mobile, email, onVerificationSuccess
     <div className="p-4 max-w-md mx-auto">
       <h3 className="text-xl font-semibold mb-4">Enter OTP</h3>
       <p className="text-sm text-gray-600 mb-2">
-        We have sent an OTP to your email: <strong>{email}</strong>
+        We have sent an OTP to your email: <strong>{email || 'N/A'}</strong>
       </p>
+      {otpCode && (
+        <p className="text-sm text-green-600 mb-2">
+          OTP IS- <strong>{otpCode}</strong>
+        </p>
+      )}
       <p className="text-xs text-gray-500 mb-4">
         Please check your email inbox and enter the 6-digit OTP below
       </p>

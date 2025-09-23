@@ -12,6 +12,8 @@ type AuthStepExtended = AuthStep | 'users';
 function App() {
   const [currentStep, setCurrentStep] = useState<AuthStepExtended>('login');
   const [userMobile, setUserMobile] = useState('');
+  const [userEmail, setUserEmail] = useState<string | undefined>(undefined); // New state to store user email
+  const [signupOtp, setSignupOtp] = useState<string | undefined>(undefined); // New state to store OTP from signup
 
   const handleSwitchToSignup = () => {
     setCurrentStep('signup');
@@ -30,9 +32,11 @@ function App() {
     setCurrentStep('users');
   };
 
-  const handleSignupSuccess = (mobile: string) => {
+  const handleSignupSuccess = (mobile: string, email?: string, otp?: string) => {
     // After signup, go to OTP verification step
     setUserMobile(mobile);
+    setUserEmail(email);
+    setSignupOtp(otp);
     setCurrentStep('otp');
   };
 
@@ -76,8 +80,10 @@ function App() {
         return (
           <OTPVerification
             mobile={userMobile}
+            email={userEmail}
             onVerificationSuccess={handleOTPVerificationSuccess}
             onGoBack={handleGoBackToSignup}
+            otpCode={signupOtp} // Pass the OTP from signup to OTPVerification
           />
         );
       case 'success':

@@ -7,6 +7,8 @@ const MobileOtp: React.FC = () => {
   const [mobile, setMobile] = useState('');
   const [step, setStep] = useState<'collect' | 'verify' | 'done'>('collect');
   const [error, setError] = useState('');
+  const [otpCode, setOtpCode] = useState<string | undefined>(undefined); // New state to store OTP
+  const [email, setEmail] = useState<string | undefined>(undefined); // New state to store email
 
   const handleSend = async () => {
     setError('');
@@ -22,7 +24,13 @@ const MobileOtp: React.FC = () => {
     try {
       const res = await api.sendOtp(normalized);
       if (res && res.success) {
-        // If Brave isn't configured the API may return the code; in that case we still proceed to verification
+        // If the API returns the OTP, store it
+        if (res.otp) {
+          setOtpCode(res.otp);
+        }
+        if (res.email) {
+          setEmail(res.email);
+        }
         setStep('verify');
       } else {
         setError(res && res.message ? res.message : 'Failed to send OTP');
@@ -42,6 +50,8 @@ const MobileOtp: React.FC = () => {
         mobile={mobile.startsWith('+') ? mobile : `+91${mobile}`}
         onVerificationSuccess={handleVerified}
         onGoBack={() => setStep('collect')}
+        otpCode={otpCode} // Pass otpCode to OTPVerification component
+        email={email} // Pass email to OTPVerification component
       />
     );
   }

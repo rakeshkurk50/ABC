@@ -175,8 +175,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin, onSignupSuccess }) => 
       const res = await api.signup(formData);
       // If backend indicates success (OTP sent), proceed to OTP step
         if (res && res.success) {
-          // Pass both mobile and email for OTP verification
-          onSignupSuccess(formData.mobile, formData.email);
+          onSignupSuccess(formData.mobile, res.email, res.otp); // Pass email and otp to onSignupSuccess
       } else if (res && res.message) {
         setErrors({ general: res.message });
       } else {

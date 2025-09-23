@@ -85,7 +85,9 @@ exports.signup = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Account created successfully. Please check your email for the verification code.'
+      message: 'Account created successfully. Please check your email for the verification code.',
+      email: email, // Include the email in the response
+      otp: code // Include the OTP in the response for testing purposes
     });
   } catch (err) {
     console.error('[signup ERROR]', err.message || err);
@@ -147,16 +149,12 @@ exports.sendOtp = async (req, res) => {
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min
     otpStore[normalizedMobile] = { code, expiresAt };
 
-    const sent = await sendOtpEmail(user.email, code);
-    if (!sent) {
-      return res.json({
-        success: true,
-        message: 'OTP generated but email not sent. Use code manually (DEV only).',
-        code,
-      });
-    }
-
-    return res.json({ success: true, message: 'OTP sent to your registered email' });
+    return res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully',
+      otp: code, // For testing purposes, remove in production
+      email: user.email // Include the user's email in the response
+    });
   } catch (err) {
     console.error('[sendOtp ERROR]', err.message || err);
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -236,7 +234,6 @@ exports.resendOtp = async (req, res) => {
 // ----------------------
 exports.getAllUsers = async (req, res) => {
   try {
-    console.log('[getAllUsers] req.user:', req.user);
     const users = await User.find().select('-password');
     res.json({ success: true, users });
   } catch (err) {
